@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended", ":disableDependencyDashboard"
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["(^|/|\\\\)deployment\\.ya?ml$"],
+      "matchStrings": [
+        "image:\\s*\"?(?<depName>[\\w./-]+):(?<currentValue>v?\\d+\\.\\d+\\.\\d+(?:[-._][0-9A-Za-z.]+)?)\"?"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ],
+  "automerge": true,
+  "automergeType": "branch",
+  "automergeStrategy": "auto",
+  "requiredStatusChecks": null
+}

@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mealie
+  namespace: mealie
+spec:
+  # Mealie does not support active/active multi-replica with SQLite.
+  # For PostgreSQL deployments, you may increase replicas, but check upstream docs first.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mealie
+  template:
+    metadata:
+      labels:
+        app: mealie
+    spec:
+      containers:
+        - name: mealie
+          # Image version is managed by Renovate (renovate.json).
+          # To pin manually, replace the tag with the desired version, e.g. v2.8.0.
+          # Releases: https://github.com/mealie-recipes/mealie/releases
+          image: ghcr.io/mealie-recipes/mealie:v3.12.0
+          ports:
+            - containerPort: 9000
+          env:
+            # --- Database credentials (from Secret) ---
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mealie-database-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mealie-database-secret
+                  key: POSTGRES_PASSWORD
+            # --- Application configuration (from ConfigMap) ---
+            - name: ALLOW_SIGNUP
+              valueFrom:
+                configMapKeyRef:
+                  name: mealie-config
+                  key: ALLOW_SIGNUP
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: mealie-config
+                  key: TZ
+            - name: BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mealie-config
+                  key: BASE_URL
+            - name: DB_ENGINE
+              valueFrom:
+                configMapKeyRef:
+                  name: mealie-config
+                  key: DB_ENGINE
+            - name: POSTGRES_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: mealie-config
+                  key: POSTGRES_SERVER
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: mealie-config
+                  key: POSTGRES_PORT
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: mealie-config
+                  key: POSTGRES_DB
+          volumeMounts:
+            - name: mealie-data
+              mountPath: /app/data/
+      volumes:
+        - name: mealie-data
+          persistentVolumeClaim:
+            claimName: mealie-data

@@ -1,0 +1,15 @@
+# ClusterIP Service exposing the Mealie web/API server on port 9000.
+# Add an Ingress or change type to LoadBalancer to expose Mealie outside the cluster.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mealie
+  namespace: mealie
+spec:
+  selector:
+    app: mealie
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+  type: ClusterIP
